@@ -1,0 +1,91 @@
+<html>
+<head>
+<title>RecyleViewTouchHelper.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #0033b3;}
+.s1 { color: #080808;}
+.s2 { color: #1750eb;}
+.s3 { color: #067d17;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+RecyleViewTouchHelper.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com.aditiyaeka.tdl;</span>
+
+<span class="s0">import </span><span class="s1">android.app.AlertDialog;</span>
+<span class="s0">import </span><span class="s1">android.content.DialogInterface;</span>
+<span class="s0">import </span><span class="s1">android.graphics.Canvas;</span>
+
+<span class="s0">import </span><span class="s1">androidx.annotation.NonNull;</span>
+<span class="s0">import </span><span class="s1">androidx.core.content.ContextCompat;</span>
+<span class="s0">import </span><span class="s1">androidx.recyclerview.widget.ItemTouchHelper;</span>
+<span class="s0">import </span><span class="s1">androidx.recyclerview.widget.RecyclerView;</span>
+
+<span class="s0">import </span><span class="s1">com.aditiyaeka.tdl.Adapter.ToDoAdapter;</span>
+
+<span class="s0">import </span><span class="s1">it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;</span>
+
+<span class="s0">public class </span><span class="s1">RecyleViewTouchHelper </span><span class="s0">extends </span><span class="s1">ItemTouchHelper.SimpleCallback {</span>
+
+    <span class="s1">ToDoAdapter adapter;</span>
+
+    <span class="s0">public </span><span class="s1">RecyleViewTouchHelper(ToDoAdapter adapter) {</span>
+        <span class="s0">super</span><span class="s1">(</span><span class="s2">0</span><span class="s1">, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);</span>
+        <span class="s0">this</span><span class="s1">.adapter = adapter;</span>
+    <span class="s1">}</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">public boolean </span><span class="s1">onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {</span>
+        <span class="s0">return false</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">public void </span><span class="s1">onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, </span><span class="s0">int </span><span class="s1">direction) {</span>
+        <span class="s0">final int </span><span class="s1">position = viewHolder.getAdapterPosition();</span>
+        <span class="s0">if </span><span class="s1">(direction == ItemTouchHelper.RIGHT) {</span>
+            <span class="s1">AlertDialog.Builder builder = </span><span class="s0">new </span><span class="s1">AlertDialog.Builder(adapter.getContext());</span>
+            <span class="s1">builder.setTitle(</span><span class="s3">&quot;Hapus Tugas&quot;</span><span class="s1">);</span>
+            <span class="s1">builder.setMessage(</span><span class="s3">&quot;Yakin ingin menghapus tugas?&quot;</span><span class="s1">);</span>
+            <span class="s1">builder.setPositiveButton(</span><span class="s3">&quot;Iya&quot;</span><span class="s1">, </span><span class="s0">new </span><span class="s1">DialogInterface.OnClickListener() {</span>
+                <span class="s1">@Override</span>
+                <span class="s0">public void </span><span class="s1">onClick(DialogInterface dialog, </span><span class="s0">int </span><span class="s1">which) {</span>
+                    <span class="s1">adapter.deleteTask(position);</span>
+                <span class="s1">}</span>
+            <span class="s1">});</span>
+            <span class="s1">builder.setNegativeButton(</span><span class="s3">&quot;Tidak&quot;</span><span class="s1">, </span><span class="s0">new </span><span class="s1">DialogInterface.OnClickListener() {</span>
+                <span class="s1">@Override</span>
+                <span class="s0">public void </span><span class="s1">onClick(DialogInterface dialog, </span><span class="s0">int </span><span class="s1">which) {</span>
+                    <span class="s1">adapter.notifyItemChanged(position);</span>
+                    <span class="s1">dialog.dismiss();</span>
+                <span class="s1">}</span>
+            <span class="s1">});</span>
+            <span class="s1">AlertDialog dialog = builder.create();</span>
+            <span class="s1">dialog.show();</span>
+        <span class="s1">} </span><span class="s0">else </span><span class="s1">{</span>
+            <span class="s1">adapter.editItems(position);</span>
+            <span class="s1">adapter.notifyItemChanged(position);</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+
+    <span class="s1">@Override</span>
+    <span class="s0">public void </span><span class="s1">onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, </span><span class="s0">float </span><span class="s1">dX, </span><span class="s0">float </span><span class="s1">dY, </span><span class="s0">int </span><span class="s1">actionState, </span><span class="s0">boolean </span><span class="s1">isCurrentlyActive) {</span>
+        <span class="s0">new </span><span class="s1">RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)</span>
+                <span class="s1">.addSwipeLeftBackgroundColor(ContextCompat.getColor(adapter.getContext(),R.color.red))</span>
+                <span class="s1">.addSwipeLeftActionIcon(R.drawable.baseline_edit)</span>
+                <span class="s1">.addSwipeRightBackgroundColor(ContextCompat.getColor(adapter.getContext(),R.color.green))</span>
+                <span class="s1">.addSwipeRightActionIcon(R.drawable.ic_delete_24)</span>
+                <span class="s1">.create()</span>
+                <span class="s1">.decorate();</span>
+
+        <span class="s0">super</span><span class="s1">.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<html>
+<head>
+<title>MainActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #0033b3;}
+.s1 { color: #080808;}
+.s2 { color: #1750eb;}
+.s3 { color: #067d17;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+MainActivity.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com.aditiyaeka.tdl;</span>
+
+<span class="s0">import </span><span class="s1">androidx.work.PeriodicWorkRequest;</span>
+<span class="s0">import </span><span class="s1">androidx.work.WorkManager;</span>
+<span class="s0">import </span><span class="s1">androidx.work.ExistingPeriodicWorkPolicy;</span>
+
+<span class="s0">import </span><span class="s1">android.content.pm.PackageManager;</span>
+<span class="s0">import </span><span class="s1">androidx.core.app.ActivityCompat;</span>
+<span class="s0">import </span><span class="s1">androidx.core.content.ContextCompat;</span>
+
+<span class="s0">import </span><span class="s1">java.util.concurrent.TimeUnit;</span>
+<span class="s0">import </span><span class="s1">android.content.DialogInterface;</span>
+<span class="s0">import </span><span class="s1">android.os.Build;</span>
+<span class="s0">import </span><span class="s1">android.os.Bundle;</span>
+<span class="s0">import </span><span class="s1">android.view.View;</span>
+
+<span class="s0">import </span><span class="s1">androidx.activity.EdgeToEdge;</span>
+<span class="s0">import </span><span class="s1">androidx.appcompat.app.AppCompatActivity;</span>
+<span class="s0">import </span><span class="s1">androidx.core.graphics.Insets;</span>
+<span class="s0">import </span><span class="s1">androidx.core.view.ViewCompat;</span>
+<span class="s0">import </span><span class="s1">androidx.core.view.WindowInsetsCompat;</span>
+<span class="s0">import </span><span class="s1">androidx.recyclerview.widget.ItemTouchHelper;</span>
+<span class="s0">import </span><span class="s1">androidx.recyclerview.widget.LinearLayoutManager;</span>
+<span class="s0">import </span><span class="s1">androidx.recyclerview.widget.RecyclerView;</span>
+
+<span class="s0">import </span><span class="s1">com.aditiyaeka.tdl.Adapter.ToDoAdapter;</span>
+<span class="s0">import </span><span class="s1">com.aditiyaeka.tdl.Model.ToDoModel;</span>
+<span class="s0">import </span><span class="s1">com.aditiyaeka.tdl.Utils.DataBaseHelper;</span>
+<span class="s0">import </span><span class="s1">com.google.android.material.floatingactionbutton.FloatingActionButton;</span>
+
+<span class="s0">import </span><span class="s1">java.util.ArrayList;</span>
+<span class="s0">import </span><span class="s1">java.util.Collections;</span>
+<span class="s0">import </span><span class="s1">java.util.List;</span>
+
+<span class="s0">public class </span><span class="s1">MainActivity </span><span class="s0">extends </span><span class="s1">AppCompatActivity </span><span class="s0">implements </span><span class="s1">OnDialogCloseListener {</span>
+
+    <span class="s1">RecyclerView recyclerView;</span>
+    <span class="s1">FloatingActionButton addButton;</span>
+    <span class="s1">DataBaseHelper myDB;</span>
+    <span class="s0">private </span><span class="s1">List&lt;ToDoModel&gt; mlist;</span>
+    <span class="s0">private </span><span class="s1">ToDoAdapter adapter;</span>
+
+
+    <span class="s1">@Override</span>
+    <span class="s0">protected void </span><span class="s1">onCreate(Bundle savedInstanceState) {</span>
+        <span class="s0">super</span><span class="s1">.onCreate(savedInstanceState);</span>
+        <span class="s1">EdgeToEdge.enable(</span><span class="s0">this</span><span class="s1">);</span>
+        <span class="s1">setContentView(R.layout.activity_main);</span>
+        <span class="s1">ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -&gt; {</span>
+            <span class="s1">Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());</span>
+            <span class="s1">v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);</span>
+            <span class="s0">return </span><span class="s1">insets;</span>
+        <span class="s1">});</span>
+
+        <span class="s1">recyclerView = findViewById(R.id.recyclerview);</span>
+        <span class="s1">addButton=findViewById(R.id.addButton);</span>
+        <span class="s1">myDB = </span><span class="s0">new </span><span class="s1">DataBaseHelper(MainActivity.</span><span class="s0">this</span><span class="s1">);</span>
+        <span class="s1">mlist = </span><span class="s0">new </span><span class="s1">ArrayList&lt;&gt;();</span>
+        <span class="s1">adapter = </span><span class="s0">new </span><span class="s1">ToDoAdapter(myDB,MainActivity.</span><span class="s0">this</span><span class="s1">);</span>
+
+        <span class="s1">recyclerView.setHasFixedSize(</span><span class="s0">true</span><span class="s1">);</span>
+        <span class="s1">recyclerView.setLayoutManager(</span><span class="s0">new </span><span class="s1">LinearLayoutManager(</span><span class="s0">this</span><span class="s1">));</span>
+        <span class="s1">recyclerView.setAdapter(adapter);</span>
+
+        <span class="s1">mlist = myDB.getAllTasks();</span>
+        <span class="s1">Collections.reverse(mlist);</span>
+        <span class="s1">adapter.setTask(mlist);</span>
+
+        <span class="s0">if </span><span class="s1">(Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU) {</span>
+            <span class="s0">if </span><span class="s1">(ContextCompat.checkSelfPermission(</span><span class="s0">this</span><span class="s1">, android.Manifest.permission.POST_NOTIFICATIONS)</span>
+                    <span class="s1">!= PackageManager.PERMISSION_GRANTED) {</span>
+
+                <span class="s1">ActivityCompat.requestPermissions(</span><span class="s0">this</span><span class="s1">,</span>
+                        <span class="s0">new </span><span class="s1">String[]{android.Manifest.permission.POST_NOTIFICATIONS}, </span><span class="s2">1</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+
+        <span class="s1">PeriodicWorkRequest reminderWork =</span>
+                <span class="s0">new </span><span class="s1">PeriodicWorkRequest.Builder(ReminderWorker.</span><span class="s0">class</span><span class="s1">, </span><span class="s2">15</span><span class="s1">, TimeUnit.MINUTES)</span>
+                        <span class="s1">.build();</span>
+
+        <span class="s1">WorkManager.getInstance(</span><span class="s0">this</span><span class="s1">).enqueueUniquePeriodicWork(</span>
+                <span class="s3">&quot;TaskReminder&quot;</span><span class="s1">,</span>
+                <span class="s1">ExistingPeriodicWorkPolicy.KEEP,</span>
+                <span class="s1">reminderWork</span>
+        <span class="s1">);</span>
+
+        <span class="s1">addButton.setOnClickListener(</span><span class="s0">new </span><span class="s1">View.OnClickListener(){</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">onClick(View view) {</span>
+                <span class="s1">AddNewTask.newInstance().show(getSupportFragmentManager(), AddNewTask.TAG);</span>
+
+            <span class="s1">}</span>
+
+        <span class="s1">});</span>
+
+        <span class="s1">ItemTouchHelper itemTouchHelper = </span><span class="s0">new </span><span class="s1">ItemTouchHelper(</span><span class="s0">new </span><span class="s1">RecyleViewTouchHelper(adapter));</span>
+        <span class="s1">itemTouchHelper.attachToRecyclerView(recyclerView);</span>
+
+    <span class="s1">}</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">public void </span><span class="s1">onDialogClose(DialogInterface dialogInterface) {</span>
+        <span class="s1">mlist = myDB.getAllTasks();</span>
+        <span class="s1">Collections.reverse(mlist);</span>
+        <span class="s1">adapter.setTask(mlist);</span>
+        <span class="s1">adapter.notifyDataSetChanged();</span>
+    <span class="s1">}</span>
+<span class="s1">}</span></pre>
+</body>
+</html>

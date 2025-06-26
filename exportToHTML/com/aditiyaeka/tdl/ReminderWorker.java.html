@@ -1,0 +1,84 @@
+<html>
+<head>
+<title>ReminderWorker.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #0033b3;}
+.s1 { color: #080808;}
+.s2 { color: #067d17;}
+.s3 { color: #8c8c8c; font-style: italic;}
+.s4 { color: #1750eb;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+ReminderWorker.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com.aditiyaeka.tdl;</span>
+
+<span class="s0">import static </span><span class="s1">android.app.NotificationManager.IMPORTANCE_DEFAULT;</span>
+
+<span class="s0">import </span><span class="s1">android.app.NotificationChannel;</span>
+<span class="s0">import </span><span class="s1">android.app.NotificationManager;</span>
+<span class="s0">import </span><span class="s1">android.content.Context;</span>
+<span class="s0">import </span><span class="s1">android.content.pm.PackageManager;</span>
+<span class="s0">import </span><span class="s1">android.os.Build;</span>
+
+<span class="s0">import </span><span class="s1">androidx.annotation.NonNull;</span>
+<span class="s0">import </span><span class="s1">androidx.core.app.NotificationCompat;</span>
+<span class="s0">import </span><span class="s1">androidx.core.app.NotificationManagerCompat;</span>
+<span class="s0">import </span><span class="s1">androidx.core.content.ContextCompat;</span>
+<span class="s0">import </span><span class="s1">androidx.work.Worker;</span>
+<span class="s0">import </span><span class="s1">androidx.work.WorkerParameters;</span>
+
+<span class="s0">public class </span><span class="s1">ReminderWorker </span><span class="s0">extends </span><span class="s1">Worker {</span>
+
+    <span class="s0">public </span><span class="s1">ReminderWorker(@NonNull Context context, @NonNull WorkerParameters params) {</span>
+        <span class="s0">super</span><span class="s1">(context, params);</span>
+    <span class="s1">}</span>
+
+    <span class="s1">@NonNull</span>
+    <span class="s1">@Override</span>
+    <span class="s0">public </span><span class="s1">Result doWork() {</span>
+        <span class="s1">sendReminderNotification();</span>
+        <span class="s0">return </span><span class="s1">Result.success();</span>
+    <span class="s1">}</span>
+
+    <span class="s0">private void </span><span class="s1">sendReminderNotification() {</span>
+        <span class="s1">Context context = getApplicationContext();</span>
+
+        <span class="s0">if </span><span class="s1">(Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU) {</span>
+            <span class="s0">if </span><span class="s1">(ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS)</span>
+                    <span class="s1">!= PackageManager.PERMISSION_GRANTED) {</span>
+
+                <span class="s0">return</span><span class="s1">;</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+
+        <span class="s0">if </span><span class="s1">(Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) {</span>
+            <span class="s1">NotificationChannel channel = </span><span class="s0">new </span><span class="s1">NotificationChannel(</span>
+                    <span class="s2">&quot;reminder_channel&quot;</span><span class="s1">,</span>
+                    <span class="s2">&quot;Reminder Channel&quot;</span><span class="s1">,</span>
+                    <span class="s1">NotificationManager.IMPORTANCE_DEFAULT</span>
+            <span class="s1">);</span>
+            <span class="s1">NotificationManager manager = context.getSystemService(NotificationManager.</span><span class="s0">class</span><span class="s1">);</span>
+            <span class="s0">if </span><span class="s1">(manager != </span><span class="s0">null</span><span class="s1">) {</span>
+                <span class="s1">manager.createNotificationChannel(channel);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+
+        <span class="s1">NotificationCompat.Builder builder = </span><span class="s0">new </span><span class="s1">NotificationCompat.Builder(context, </span><span class="s2">&quot;reminder_channel&quot;</span><span class="s1">)</span>
+                <span class="s1">.setSmallIcon(R.drawable.baseline_beach_access_24) </span><span class="s3">// sudah oke</span>
+                <span class="s1">.setContentTitle(</span><span class="s2">&quot;Ingat Aku?&quot;</span><span class="s1">)</span>
+                <span class="s1">.setContentText(</span><span class="s2">&quot;Ada tugas yang belum selesai nih.&quot;</span><span class="s1">)</span>
+                <span class="s1">.setPriority(NotificationCompat.PRIORITY_DEFAULT);</span>
+
+        <span class="s1">NotificationManagerCompat manager = NotificationManagerCompat.from(context);</span>
+        <span class="s1">manager.notify(</span><span class="s4">2002</span><span class="s1">, builder.build());</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>
